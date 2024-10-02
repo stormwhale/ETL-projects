@@ -1,4 +1,6 @@
 pip install bs4
+pip install requests
+
 import pandas as pd
 from bs4 import BeautifulSoup
 import requests
@@ -10,9 +12,8 @@ url = 'https://www.investing.com/indices/major-indices'
 
 db= 'serv1.db'
 table='indexes'
-conn = sqlite3.connect(db)
 log_file=('log.txt')
-
+conn = sqlite3.connect(db)
 
 #function phase
 def extract(url, num): #num = max rows to display. Max = 46
@@ -33,7 +34,7 @@ def extract(url, num): #num = max rows to display. Max = 46
                 change = col[5].contents[0]
                 percent = col[6].contents[0]
                 time = datetime.now().strftime("%Y/%m/%d")
-                         
+                  
                 df = pd.concat([df,pd.DataFrame([{'Index_Name':name, 'Last_Price': last, 'High':high, 'Low':low, 'Change':change, 'Change_Percent': percent, 'Date':time}])], ignore_index=True)
             count = count + 1
         else:
@@ -66,17 +67,13 @@ def run(sql, connection):
 
 
 #execution       
-a = extract(url, 46)
-transform(a)
-save_load(a, table, log_file)
+data = extract(url, 46)
+transformed_data = transform(data)
+save_load(transformed_data, table, log_file)
 
-
-sql = f"select * from {table}"
-run(sql, conn)
-
-
-
-
+#run query from sqlite3
+sql_query = f"select * from {table}"
+run(sql_query, conn)
 
 
       
